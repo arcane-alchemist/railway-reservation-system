@@ -18,7 +18,7 @@ import java.util.Scanner;
 
 /**
  * Main application entrypoint.
- * Supports both modern JavaFX GUI and interactive CLI simulation mode.
+ * Supports both modern JavaFX GUI and interactive CLI terminal mode.
  */
 public class Main extends Application {
 
@@ -102,11 +102,11 @@ public class Main extends Application {
         while (running) {
             System.out.println("\n--- MAIN MENU ---");
             System.out.println("1. 🔍 Search Trains & Station List");
-            System.out.println("2. 🎫 Book a Train Ticket (OOP Polymorphic Fare Calculation)");
+            System.out.println("2. 🎫 Book a Train Ticket (Real-Time Berth Allocation)");
             System.out.println("3. 📜 View My Bookings History");
             System.out.println("4. 🔎 Check PNR Status");
-            System.out.println("5. ❌ Cancel a Ticket");
-            System.out.println("6. ⚡ Run High-Concurrency Multithreading Simulation (Tatkal Storm)");
+            System.out.println("5. ❌ Cancel a Ticket (IRCTC Tiered Refund Policy)");
+            System.out.println("6. 🛡️ Operations Admin: Live Fleet & System Bookings Ledger");
             System.out.println("7. 🚪 Exit");
             System.out.print("Select an option (1-7): ");
 
@@ -128,7 +128,7 @@ public class Main extends Application {
                     handleCliCancelBooking(bookingService, scanner);
                     break;
                 case "6":
-                    handleCliConcurrencySimulation(bookingService);
+                    handleCliAdminFleetAndLedger(trainService, bookingService);
                     break;
                 case "7":
                     System.out.println("Thank you for using Indian Railways. Goodbye!");
@@ -291,8 +291,36 @@ public class Main extends Application {
         }
     }
 
-    private static void handleCliConcurrencySimulation(BookingService bookingService) {
-        System.out.println("\nRunning Multithreading Simulation with 25 concurrent threads competing for seats...");
-        bookingService.runConcurrencySimulation(1, 25);
+    private static void handleCliAdminFleetAndLedger(TrainService trainService, BookingService bookingService) {
+        System.out.println("\n==================================================================");
+        System.out.println("     🛡️  INDIAN RAILWAYS OPERATIONS FLEET & SYSTEM LEDGER       ");
+        System.out.println("==================================================================");
+        System.out.println("\n[1] LIVE TRAIN FLEET INVENTORY:");
+        for (Train t : trainService.getAllTrains()) {
+            System.out.printf("  • %s - %-26s | %s ➔ %s | Seats: %d/%d (Gen Avail: %d, Tatkal Avail: %d) | Base: ₹%.2f, Tatkal: ₹%.2f\n",
+                    t.getTrainNumber(), t.getTrainName(), t.getSourceStationName(), t.getDestinationStationName(),
+                    t.getAvailableSeats(), t.getTotalSeats(), t.getAvailableSeats(), t.getTatkalAvailableSeats(),
+                    t.getBaseFare(), t.getTatkalFare());
+        }
+
+        System.out.println("\n[2] SYSTEM-WIDE BOOKINGS & REVENUE AUDIT LEDGER:");
+        List<Booking> allBookings = bookingService.getAllBookingsSystemWide();
+        if (allBookings.isEmpty()) {
+            System.out.println("  No passenger bookings currently in system database.");
+        } else {
+            double totalRevenue = 0.0;
+            double totalRefunds = 0.0;
+            for (Booking b : allBookings) {
+                System.out.printf("  PNR: %-12s | User #%-2d | Train: %-22s | Date: %s | Status: %-10s | Fare: ₹%8.2f | Refund: ₹%.2f\n",
+                        b.getBookingReference(), b.getUserId(), b.getTrainName(), b.getTravelDate(), b.getStatus(),
+                        b.getTotalFare(), b.getRefundAmount());
+                if ("CONFIRMED".equalsIgnoreCase(b.getStatus())) totalRevenue += b.getTotalFare();
+                if ("CANCELLED".equalsIgnoreCase(b.getStatus())) totalRefunds += b.getRefundAmount();
+            }
+            System.out.println("------------------------------------------------------------------");
+            System.out.printf("Total Recorded Bookings: %d | Confirmed Revenue: ₹%.2f | Refunds Issued: ₹%.2f\n",
+                    allBookings.size(), totalRevenue, totalRefunds);
+            System.out.println("==================================================================");
+        }
     }
 }
