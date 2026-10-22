@@ -1,0 +1,20 @@
+==================================================================================
+                      🚆  INDIAN RAILWAYS - ELECTRONIC RESERVATION SLIP (ERS)     
+==================================================================================
+ PNR NUMBER: PNR66291790               BOOKING DATE: Instant
+ STATUS:     CONFIRMED                 TRAVEL CLASS:  AC_3_TIER
+----------------------------------------------------------------------------------
+ TRAIN:      Mumbai Rajdhani Express (12952)
+ ROUTE:      New Delhi Central  ➔  Chhatrapati Shivaji Maharaj Terminus
+ DEPARTURE DATE: 2026-10-23
+==================================================================================
+ #    PASSENGER NAME            AGE    GENDER   BERTH / SEAT    STATUS      
+----------------------------------------------------------------------------------
+ 1    Aakriti Gupta             21     Female   Seat #1 (LOWER) CONFIRMED   
+==================================================================================
+ TOTAL FARE PAID (INCL. GST):  ₹ 3496.50
+ DIGITAL VERIFICATION CODE:    564101288-SECURE
+==================================================================================
+  * Please carry valid Government ID during travel.
+  * Have a pleasant and safe journey with Indian Railways.
+==================================================================================

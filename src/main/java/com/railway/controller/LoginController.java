@@ -58,7 +58,7 @@ public class LoginController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
             showStatus("Login successful! Welcome " + user.getFullName(), false);
-            navigateToDashboard(event);
+            navigateToRoleView(event, user);
         } else {
             showStatus("Invalid credentials. Please try again.", true);
         }
@@ -96,7 +96,8 @@ public class LoginController {
         boolean success = authService.registerPassenger(username, password, fullName, email, phone, age, gender);
         if (success) {
             showRegStatus("Registration successful! Logging you in...", false);
-            navigateToDashboard(event);
+            Optional<User> userOpt = authService.login(username, password);
+            userOpt.ifPresent(user -> navigateToRoleView(event, user));
         } else {
             showRegStatus("Username or email already exists.", true);
         }
@@ -105,29 +106,33 @@ public class LoginController {
     private void showStatus(String msg, boolean isError) {
         if (statusLabel != null) {
             statusLabel.setText(msg);
-            statusLabel.setStyle(isError ? "-fx-text-fill: #e63946;" : "-fx-text-fill: #2a9d8f;");
+            statusLabel.setStyle(isError ? "-fx-text-fill: #ef4444;" : "-fx-text-fill: #10b981;");
         }
     }
 
     private void showRegStatus(String msg, boolean isError) {
         if (regStatusLabel != null) {
             regStatusLabel.setText(msg);
-            regStatusLabel.setStyle(isError ? "-fx-text-fill: #e63946;" : "-fx-text-fill: #2a9d8f;");
+            regStatusLabel.setStyle(isError ? "-fx-text-fill: #ef4444;" : "-fx-text-fill: #10b981;");
         }
     }
 
-    private void navigateToDashboard(ActionEvent event) {
+    private void navigateToRoleView(ActionEvent event, User user) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/dashboard.fxml"));
+            boolean isAdmin = user != null && (user.canManageTrains() || "ADMIN".equalsIgnoreCase(user.getRole()));
+            String fxmlPath = isAdmin ? "/views/admin_dashboard.fxml" : "/views/dashboard.fxml";
+            String title = isAdmin ? "Indian Railways — Operations & Admin Console" : "RailPlan — IRCTC Passenger Portal";
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root, 1000, 700);
+            Scene scene = new Scene(root, 1024, 720);
             scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-            stage.setTitle("Indian Railways - Dashboard");
+            stage.setTitle(title);
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
-            System.err.println("Failed to load dashboard.fxml: " + e.getMessage());
+            System.err.println("Failed to load view: " + e.getMessage());
             e.printStackTrace();
         }
     }

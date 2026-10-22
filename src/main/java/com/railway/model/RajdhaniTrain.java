@@ -12,6 +12,15 @@ public class RajdhaniTrain extends Train {
                 totalSeats, availableSeats, baseFare, "RAJDHANI");
     }
 
+    public RajdhaniTrain(int id, String trainNumber, String trainName, int sourceStationId, int destinationStationId,
+                         String departureTime, String arrivalTime, String duration, double rating,
+                         int totalSeats, int availableSeats, int tatkalTotalSeats, int tatkalAvailableSeats,
+                         double baseFare, double tatkalFare) {
+        super(id, trainNumber, trainName, sourceStationId, destinationStationId, departureTime, arrivalTime,
+                duration, rating, totalSeats, availableSeats, tatkalTotalSeats, tatkalAvailableSeats,
+                baseFare, tatkalFare, "RAJDHANI");
+    }
+
     @Override
     public String getAmenities() {
         return "Complimentary Gourmet Meals, Bedding & High-Speed Priority Track Clearance";

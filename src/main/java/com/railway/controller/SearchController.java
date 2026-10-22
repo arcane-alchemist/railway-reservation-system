@@ -30,14 +30,19 @@ public class SearchController {
     @FXML private ComboBox<Station> sourceStationCombo;
     @FXML private ComboBox<Station> destinationStationCombo;
     @FXML private DatePicker travelDatePicker;
+    @FXML private ComboBox<String> quotaCombo;
+    @FXML private ComboBox<String> classFilterCombo;
     @FXML private Label searchStatusLabel;
 
     @FXML private TableView<Train> trainTable;
     @FXML private TableColumn<Train, String> trainNumberCol;
     @FXML private TableColumn<Train, String> trainNameCol;
+    @FXML private TableColumn<Train, String> durationCol;
+    @FXML private TableColumn<Train, Number> ratingCol;
     @FXML private TableColumn<Train, String> departureCol;
     @FXML private TableColumn<Train, String> arrivalCol;
     @FXML private TableColumn<Train, Number> seatsCol;
+    @FXML private TableColumn<Train, Number> tatkalSeatsCol;
     @FXML private TableColumn<Train, Number> fareCol;
     @FXML private TableColumn<Train, String> typeCol;
 
@@ -48,15 +53,44 @@ public class SearchController {
 
     public static Train selectedTrainForBooking;
     public static LocalDate selectedTravelDate;
+    public static String selectedQuota = "GENERAL";
+    public static String selectedClass = "AC_3_TIER";
 
     @FXML
     public void initialize() {
         setupStationComboBoxes();
+        setupFiltersAndQuotas();
         setupTableColumns();
         if (travelDatePicker != null) {
             travelDatePicker.setValue(LocalDate.now().plusDays(1));
         }
         loadAllTrains();
+    }
+
+    private void setupFiltersAndQuotas() {
+        if (quotaCombo != null) {
+            quotaCombo.getItems().addAll("GENERAL", "TATKAL", "LADIES", "SENIOR_CITIZEN");
+            quotaCombo.setValue("GENERAL");
+            quotaCombo.valueProperty().addListener((obs, oldV, newV) -> {
+                selectedQuota = newV != null ? newV : "GENERAL";
+                updateSeatValidation();
+            });
+        }
+        if (classFilterCombo != null) {
+            classFilterCombo.getItems().addAll("ALL", "AC_3_TIER", "AC_2_TIER", "AC_1_TIER", "SLEEPER", "CHAIR_CAR");
+            classFilterCombo.setValue("ALL");
+        }
+    }
+
+    @FXML
+    public void handleSwapStations(ActionEvent event) {
+        if (sourceStationCombo != null && destinationStationCombo != null) {
+            Station src = sourceStationCombo.getValue();
+            Station dest = destinationStationCombo.getValue();
+            sourceStationCombo.setValue(dest);
+            destinationStationCombo.setValue(src);
+            showStatus("Stations swapped ⇄", false);
+        }
     }
 
     private void setupStationComboBoxes() {
@@ -92,19 +126,41 @@ public class SearchController {
 
         trainNumberCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTrainNumber()));
         trainNameCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTrainName()));
+        if (durationCol != null) {
+            durationCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDuration()));
+        }
+        if (ratingCol != null) {
+            ratingCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getRating()));
+        }
         departureCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDepartureTime()));
         arrivalCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getArrivalTime()));
         seatsCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getAvailableSeats()));
-        fareCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getBaseFare()));
+        if (tatkalSeatsCol != null) {
+            tatkalSeatsCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getTatkalAvailableSeats()));
+        }
+        fareCol.setCellValueFactory(cellData -> {
+            Train t = cellData.getValue();
+            boolean isTatkal = "TATKAL".equalsIgnoreCase(quotaCombo != null ? quotaCombo.getValue() : "GENERAL");
+            return new SimpleDoubleProperty(isTatkal ? t.getTatkalFare() : t.getBaseFare());
+        });
         typeCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTrainType()));
 
         trainTable.setItems(trainList);
 
-        trainTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
-            if (bookTrainButton != null) {
-                bookTrainButton.setDisable(newVal == null || newVal.getAvailableSeats() <= 0);
+        trainTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> updateSeatValidation());
+    }
+
+    private void updateSeatValidation() {
+        Train newVal = trainTable.getSelectionModel().getSelectedItem();
+        if (bookTrainButton != null) {
+            if (newVal == null) {
+                bookTrainButton.setDisable(true);
+            } else {
+                boolean isTatkal = "TATKAL".equalsIgnoreCase(quotaCombo != null ? quotaCombo.getValue() : "GENERAL");
+                int seats = isTatkal ? newVal.getTatkalAvailableSeats() : newVal.getAvailableSeats();
+                bookTrainButton.setDisable(seats <= 0);
             }
-        });
+        }
     }
 
     private void loadAllTrains() {
@@ -132,7 +188,7 @@ public class SearchController {
         if (found.isEmpty()) {
             showStatus("No direct trains found between " + src.getStationCode() + " and " + dest.getStationCode(), true);
         } else {
-            showStatus("Found " + found.size() + " train(s) available.", false);
+            showStatus("Found " + found.size() + " train(s) available for booking.", false);
         }
     }
 
@@ -147,6 +203,9 @@ public class SearchController {
         selectedTrainForBooking = selected;
         selectedTravelDate = travelDatePicker != null && travelDatePicker.getValue() != null ?
                 travelDatePicker.getValue() : LocalDate.now().plusDays(1);
+        selectedQuota = quotaCombo != null && quotaCombo.getValue() != null ? quotaCombo.getValue() : "GENERAL";
+        selectedClass = classFilterCombo != null && !"ALL".equalsIgnoreCase(classFilterCombo.getValue()) ?
+                classFilterCombo.getValue() : "AC_3_TIER";
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ticket.fxml"));

@@ -94,8 +94,14 @@ public class BookingController {
 
         if (classChoiceBox != null) {
             classChoiceBox.getItems().addAll("AC_3_TIER", "AC_2_TIER", "AC_1_TIER", "SLEEPER", "CHAIR_CAR");
-            classChoiceBox.setValue("AC_3_TIER");
+            classChoiceBox.setValue(SearchController.selectedClass != null ? SearchController.selectedClass : "AC_3_TIER");
             classChoiceBox.valueProperty().addListener((obs, oldVal, newVal) -> updateFarePreview());
+        }
+
+        if (trainInfoLabel != null) {
+            String quotaBadge = " [" + SearchController.selectedQuota + " QUOTA]";
+            trainInfoLabel.setText(currentTrain.getTrainNumber() + " - " + currentTrain.getTrainName() +
+                    " (" + currentTrain.getTrainType() + ")" + quotaBadge);
         }
 
         if (passengerGenderCombo != null) {
@@ -171,7 +177,13 @@ public class BookingController {
     private void updateFarePreview() {
         if (totalFareLabel == null || currentTrain == null) return;
         String travelClass = classChoiceBox != null ? classChoiceBox.getValue() : "AC_3_TIER";
-        double total = bookingService.getFareService().calculateTotalFare(currentTrain, travelClass, passengerList);
+        double standard = bookingService.getFareService().calculateTotalFare(currentTrain, travelClass, passengerList);
+        double total;
+        if ("TATKAL".equalsIgnoreCase(SearchController.selectedQuota)) {
+            total = bookingService.getTatkalService().calculateTatkalFare(currentTrain, travelClass, standard);
+        } else {
+            total = standard;
+        }
         totalFareLabel.setText(String.format("₹ %.2f", total));
     }
 
@@ -184,13 +196,14 @@ public class BookingController {
 
         int userId = AuthService.getCurrentUser() != null ? AuthService.getCurrentUser().getId() : 2; // Default passenger id
         String travelClass = classChoiceBox.getValue();
+        String quota = SearchController.selectedQuota != null ? SearchController.selectedQuota : "GENERAL";
 
         // Multithreading: Show loading spinner on UI thread while background thread processes booking
         if (progressIndicator != null) progressIndicator.setVisible(true);
         if (confirmBookingButton != null) confirmBookingButton.setDisable(true);
-        showStatus("Processing booking through multithreaded queue...", false);
+        showStatus("Confirming reservation with Indian Railways live inventory...", false);
 
-        bookingService.bookTicketAsync(userId, currentTrain.getId(), travelDateString, travelClass, passengerList)
+        bookingService.bookTicketAsync(userId, currentTrain.getId(), travelDateString, travelClass, quota, passengerList)
                 .thenAcceptAsync(result -> {
                     // Update UI safely on JavaFX Application Thread
                     Platform.runLater(() -> {
@@ -212,17 +225,28 @@ public class BookingController {
         if (ticketConfirmationCard != null) {
             ticketConfirmationCard.setVisible(true);
             if (pnrNumberLabel != null) {
-                pnrNumberLabel.setText("PNR: " + booking.getBookingReference());
+                pnrNumberLabel.setText("PNR: " + booking.getBookingReference() + " (" + booking.getQuota() + ")");
             }
             if (ticketDetailsLabel != null) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Train: ").append(booking.getTrainName()).append(" (").append(booking.getTrainNumber()).append(")\n");
-                sb.append("Class: ").append(booking.getTravelClass()).append(" | Date: ").append(booking.getTravelDate()).append("\n");
-                sb.append("Total Amount Paid: ₹").append(booking.getTotalFare()).append("\n");
-                sb.append("Status: ").append(booking.getStatus()).append("\n\nPassengers:\n");
+                sb.append("Class: ").append(booking.getTravelClass()).append(" | Date: ").append(booking.getTravelDate())
+                  .append(" | Quota: ").append(booking.getQuota()).append("\n");
+                sb.append("Total Amount Paid: ₹").append(String.format("%.2f", booking.getTotalFare())).append("\n");
+                sb.append("Booking Status: ").append(booking.getStatus()).append("\n\nPassengers & Allocated Berths:\n");
+
+                boolean hasFallback = false;
                 for (Reservation r : booking.getReservations()) {
-                    sb.append("• ").append(r.getPassengerName()).append(" - Seat #").append(r.getSeatNumber())
-                      .append(" (").append(r.getBerthPreference()).append(")\n");
+                    String seatStr = r.getSeatNumber() > 0 ? "Coach " + r.getCoachNumber() + " - Seat #" + r.getSeatNumber() + " (" + r.getAllocatedBerth() + ")" : "Waiting List";
+                    sb.append("• ").append(r.getPassengerName()).append(" -> ").append(seatStr);
+                    if (r.isRandomlyAllocated()) {
+                        hasFallback = true;
+                        sb.append("  [Assigned Randomly - ").append(r.getAllocationNote()).append("]");
+                    }
+                    sb.append("\n");
+                }
+                if (hasFallback) {
+                    sb.append("\n⚠️ Notice: Requested berth preference was unavailable among unbooked seats. A random unbooked seat was assigned.\n");
                 }
                 ticketDetailsLabel.setText(sb.toString());
             }

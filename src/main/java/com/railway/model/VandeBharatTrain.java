@@ -12,6 +12,15 @@ public class VandeBharatTrain extends Train {
                 totalSeats, availableSeats, baseFare, "VANDE_BHARAT");
     }
 
+    public VandeBharatTrain(int id, String trainNumber, String trainName, int sourceStationId, int destinationStationId,
+                            String departureTime, String arrivalTime, String duration, double rating,
+                            int totalSeats, int availableSeats, int tatkalTotalSeats, int tatkalAvailableSeats,
+                            double baseFare, double tatkalFare) {
+        super(id, trainNumber, trainName, sourceStationId, destinationStationId, departureTime, arrivalTime,
+                duration, rating, totalSeats, availableSeats, tatkalTotalSeats, tatkalAvailableSeats,
+                baseFare, tatkalFare, "VANDE_BHARAT");
+    }
+
     @Override
     public String getAmenities() {
         return "160 km/h Cruising, 180° Rotating Ergonomic Seats, Bio-Vacuum Toilets & Onboard Wi-Fi Infotainment";

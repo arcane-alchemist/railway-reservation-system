@@ -6,10 +6,10 @@
 
 <ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.railway.controller.BookingController"
-            style="-fx-background-color: #0b1120;">
-    <VBox spacing="18" style="-fx-background-color: #0b1120;">
+            styleClass="app-root">
+    <VBox spacing="16" styleClass="app-root">
         <padding>
-            <Insets top="20" right="25" bottom="25" left="25"/>
+            <Insets top="16" right="20" bottom="24" left="20"/>
         </padding>
 
         <!-- Top Navigation -->
@@ -19,7 +19,7 @@
             </padding>
             <Button text="← Back to Search" onAction="#handleBackToSearch" styleClass="btn-secondary"/>
             <VBox HBox.hgrow="ALWAYS">
-                <Label text="Passenger Reservation &amp; Ticket Booking" styleClass="section-title"/>
+                <Label text="Passenger Details &amp; Berth Reservation" styleClass="section-title"/>
                 <Label text="Enter passenger details and confirm your seats" styleClass="header-subtitle"/>
             </VBox>
         </HBox>
@@ -31,11 +31,11 @@
             </padding>
             <HBox alignment="CENTER_LEFT" spacing="20">
                 <VBox HBox.hgrow="ALWAYS">
-                    <Label fx:id="trainInfoLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;"/>
+                    <Label fx:id="trainInfoLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
                     <Label fx:id="routeLabel" styleClass="header-subtitle"/>
-                    <Label fx:id="travelDateLabel" style="-fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-padding: 4 0 0 0;"/>
+                    <Label fx:id="travelDateLabel" style="-fx-text-fill: #2563eb; -fx-font-weight: bold; -fx-padding: 4 0 0 0;"/>
                 </VBox>
-                <VBox spacing="4" prefWidth="200">
+                <VBox spacing="4" prefWidth="220">
                     <Label text="Select Travel Class:"/>
                     <ComboBox fx:id="classChoiceBox" maxWidth="Infinity"/>
                 </VBox>
@@ -43,30 +43,30 @@
         </VBox>
 
         <!-- Split Booking Details (Left: Add Passenger Form, Right: Passenger List & Total Fare) -->
-        <HBox spacing="20">
+        <HBox spacing="16">
             <!-- Left: Add Passenger Form Card -->
-            <VBox spacing="14" styleClass="card-panel" HBox.hgrow="ALWAYS" prefWidth="480">
+            <VBox spacing="12" styleClass="card-panel" HBox.hgrow="ALWAYS" prefWidth="500">
                 <padding>
-                    <Insets top="18" right="20" bottom="18" left="20"/>
+                    <Insets top="16" right="18" bottom="16" left="18"/>
                 </padding>
                 <Label text="Add Passenger" styleClass="section-title"/>
-                <Label text="Enter passenger name, age (senior concessions automatically calculated)." styleClass="header-subtitle"/>
+                <Label text="Enter passenger name, age, and berth preference. Senior citizen concessions are applied automatically." styleClass="header-subtitle"/>
 
-                <VBox spacing="6">
+                <VBox spacing="5">
                     <Label text="Passenger Full Name:"/>
                     <TextField fx:id="passengerNameField" promptText="e.g. Ramesh Kumar"/>
                 </VBox>
 
-                <HBox spacing="12">
-                    <VBox spacing="6" prefWidth="120">
+                <HBox spacing="10">
+                    <VBox spacing="5" prefWidth="100">
                         <Label text="Age:"/>
                         <TextField fx:id="passengerAgeField" promptText="e.g. 62"/>
                     </VBox>
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <VBox spacing="5" HBox.hgrow="ALWAYS">
                         <Label text="Gender:"/>
                         <ComboBox fx:id="passengerGenderCombo" maxWidth="Infinity"/>
                     </VBox>
-                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                    <VBox spacing="5" HBox.hgrow="ALWAYS">
                         <Label text="Berth Preference:"/>
                         <ComboBox fx:id="berthPrefCombo" maxWidth="Infinity"/>
                     </VBox>
@@ -81,22 +81,22 @@
             </VBox>
 
             <!-- Right: Review Passengers & Price Summary Card -->
-            <VBox spacing="14" styleClass="card-panel" HBox.hgrow="ALWAYS" prefWidth="440">
+            <VBox spacing="12" styleClass="card-panel" HBox.hgrow="ALWAYS" prefWidth="440">
                 <padding>
-                    <Insets top="18" right="20" bottom="18" left="20"/>
+                    <Insets top="16" right="18" bottom="16" left="18"/>
                 </padding>
-                <Label text="Passengers &amp; Fare Summary" styleClass="section-title"/>
+                <Label text="Passenger Roster &amp; Payment Summary" styleClass="section-title"/>
 
-                <ListView fx:id="passengerListView" prefHeight="160"/>
+                <ListView fx:id="passengerListView" prefHeight="150"/>
 
                 <HBox alignment="CENTER_LEFT" spacing="10">
                     <VBox HBox.hgrow="ALWAYS">
                         <Label text="Total Payable Amount (incl. taxes):" styleClass="header-subtitle"/>
-                        <Label fx:id="totalFareLabel" text="₹ 0.00" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+                        <Label fx:id="totalFareLabel" text="₹ 0.00" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #059669;"/>
                     </VBox>
                     <ProgressIndicator fx:id="progressIndicator" prefWidth="28" prefHeight="28"/>
                     <Button fx:id="confirmBookingButton" text="Confirm &amp; Book Ticket" onAction="#handleConfirmBooking"
-                            styleClass="btn-success" prefHeight="44"/>
+                            styleClass="btn-success" prefHeight="42"/>
                 </HBox>
             </VBox>
         </HBox>
@@ -104,19 +104,19 @@
         <!-- Confirmed Ticket Display (Initially Hidden) -->
         <VBox fx:id="ticketConfirmationCard" spacing="12" styleClass="ticket-card">
             <padding>
-                <Insets top="20" right="25" bottom="20" left="25"/>
+                <Insets top="18" right="22" bottom="18" left="22"/>
             </padding>
             <HBox alignment="CENTER_LEFT" spacing="15">
-                <Label text="🎉 TICKET CONFIRMED SUCCESSFULLY!" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #34d399;"/>
+                <Label text="🎉 TICKET CONFIRMED SUCCESSFULLY!" style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #059669;"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Label fx:id="pnrNumberLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #38bdf8; -fx-background-color: #0c4a6e; -fx-padding: 4 12; -fx-background-radius: 8;"/>
+                <Label fx:id="pnrNumberLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1d4ed8; -fx-background-color: #dbeafe; -fx-padding: 4 12; -fx-background-radius: 6;"/>
             </HBox>
 
-            <Separator style="-fx-opacity: 0.3;"/>
-            <Label fx:id="ticketDetailsLabel" style="-fx-font-size: 14px; -fx-line-spacing: 4px; -fx-text-fill: #f1f5f9;"/>
+            <Separator style="-fx-opacity: 0.5;"/>
+            <Label fx:id="ticketDetailsLabel" style="-fx-font-size: 13px; -fx-line-spacing: 4px; -fx-text-fill: #1e293b;"/>
             
             <HBox spacing="12" alignment="CENTER_RIGHT">
-                <Label fx:id="downloadStatusLabel" style="-fx-text-fill: #34d399; -fx-font-weight: bold;"/>
+                <Label fx:id="downloadStatusLabel" style="-fx-text-fill: #059669; -fx-font-weight: bold;"/>
                 <Button text="💾 Download Official E-Ticket (.txt)" onAction="#handleDownloadETicket" styleClass="btn-primary"/>
             </HBox>
         </VBox>

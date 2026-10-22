@@ -43,4 +43,9 @@ public class TrainService {
                 .map(train -> train.getAvailableSeats() >= requiredSeats)
                 .orElse(false);
     }
+
+    public boolean updateTrainPricingAndSeats(int trainId, double baseFare, double tatkalFare, int totalSeats, int tatkalSeats, String depTime, String arrTime) {
+        return trainDAO.updateTrainPricingAndSeats(trainId, baseFare, tatkalFare, totalSeats, tatkalSeats, depTime, arrTime);
+    }
 }
+

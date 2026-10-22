@@ -27,4 +27,20 @@ public class BerthAllocatorTest {
         String berth = BerthAllocator.allocateOptimalBerth(femalePax);
         assertEquals(BerthAllocator.LOWER, berth, "Female passenger without preference should receive LOWER berth");
     }
+
+    @Test
+    public void testRandomAllocationFallbackWhenRequestedBerthUnavailable() {
+        // In standard coach mod 8 in {1, 4} are LOWER. Let's occupy seats 1 and 4 for 8 total seats
+        java.util.Set<Integer> occupied = new java.util.HashSet<>(java.util.Arrays.asList(1, 4));
+        Reservation pax = new Reservation("John Doe", 30, "Male", "LOWER");
+        java.util.List<Reservation> list = new java.util.ArrayList<>(java.util.Collections.singletonList(pax));
+
+        BerthAllocator.allocateSeatsRealtime(8, occupied, list);
+
+        assertTrue(pax.isRandomlyAllocated(), "Should be marked as randomly allocated");
+        assertNotEquals(1, pax.getSeatNumber());
+        assertNotEquals(4, pax.getSeatNumber());
+        assertTrue(pax.getSeatNumber() > 0 && pax.getSeatNumber() <= 8);
+        assertTrue(pax.getAllocationNote().contains("Requested LOWER unavailable. Randomly assigned Seat #"));
+    }
 }

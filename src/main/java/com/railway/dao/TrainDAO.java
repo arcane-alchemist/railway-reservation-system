@@ -118,6 +118,19 @@ public class TrainDAO {
         }
     }
 
+    public boolean reserveTatkalSeatsAtomically(Connection conn, int trainId, int seatsToReserve) throws SQLException {
+        String sql = "UPDATE trains SET tatkal_available_seats = tatkal_available_seats - ?, available_seats = MAX(0, available_seats - ?) " +
+                     "WHERE id = ? AND tatkal_available_seats >= ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, seatsToReserve);
+            pstmt.setInt(2, seatsToReserve);
+            pstmt.setInt(3, trainId);
+            pstmt.setInt(4, seatsToReserve);
+            int rowsUpdated = pstmt.executeUpdate();
+            return rowsUpdated > 0;
+        }
+    }
+
     public void releaseSeats(Connection conn, int trainId, int seatsToRelease) throws SQLException {
         String sql = "UPDATE trains SET available_seats = MIN(total_seats, available_seats + ?) " +
                      "WHERE id = ?";
@@ -125,6 +138,39 @@ public class TrainDAO {
             pstmt.setInt(1, seatsToRelease);
             pstmt.setInt(2, trainId);
             pstmt.executeUpdate();
+        }
+    }
+
+    public void releaseTatkalSeats(Connection conn, int trainId, int seatsToRelease) throws SQLException {
+        String sql = "UPDATE trains SET tatkal_available_seats = MIN(tatkal_total_seats, tatkal_available_seats + ?), " +
+                     "available_seats = MIN(total_seats, available_seats + ?) " +
+                     "WHERE id = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, seatsToRelease);
+            pstmt.setInt(2, seatsToRelease);
+            pstmt.setInt(3, trainId);
+            pstmt.executeUpdate();
+        }
+    }
+
+    /**
+     * Admin functionality to update live train pricing, tatkal seats, and schedules.
+     */
+    public boolean updateTrainPricingAndSeats(int trainId, double baseFare, double tatkalFare, int totalSeats, int tatkalSeats, String depTime, String arrTime) {
+        String sql = "UPDATE trains SET base_fare = ?, tatkal_fare = ?, total_seats = ?, tatkal_total_seats = ?, departure_time = ?, arrival_time = ? WHERE id = ?";
+        try (Connection conn = db.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, baseFare);
+            pstmt.setDouble(2, tatkalFare);
+            pstmt.setInt(3, totalSeats);
+            pstmt.setInt(4, tatkalSeats);
+            pstmt.setString(5, depTime);
+            pstmt.setString(6, arrTime);
+            pstmt.setInt(7, trainId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            System.err.println("Error updating train details: " + e.getMessage());
+            return false;
         }
     }
 
@@ -136,25 +182,52 @@ public class TrainDAO {
         int destinationStationId = rs.getInt("destination_station_id");
         String departureTime = rs.getString("departure_time");
         String arrivalTime = rs.getString("arrival_time");
+        String duration = "15h 40m";
+        try { duration = rs.getString("duration"); } catch (SQLException ignored) {}
+        if (duration == null) duration = "15h 40m";
+
+        double rating = 4.8;
+        try { rating = rs.getDouble("rating"); } catch (SQLException ignored) {}
+        if (rating <= 0) rating = 4.8;
+
         int totalSeats = rs.getInt("total_seats");
         int availableSeats = rs.getInt("available_seats");
+
+        int tatkalTotalSeats = 15;
+        try { tatkalTotalSeats = rs.getInt("tatkal_total_seats"); } catch (SQLException ignored) {}
+        if (tatkalTotalSeats <= 0) tatkalTotalSeats = 15;
+
+        int tatkalAvailableSeats = 15;
+        try { tatkalAvailableSeats = rs.getInt("tatkal_available_seats"); } catch (SQLException ignored) {}
+
         double baseFare = rs.getDouble("base_fare");
+        double tatkalFare = baseFare * 1.30;
+        try {
+            double tf = rs.getDouble("tatkal_fare");
+            if (tf > 0) tatkalFare = tf;
+        } catch (SQLException ignored) {}
+
         String trainType = rs.getString("train_type");
 
         Train t;
         if ("RAJDHANI".equalsIgnoreCase(trainType)) {
             t = new com.railway.model.RajdhaniTrain(id, trainNumber, trainName, sourceStationId, destinationStationId,
-                    departureTime, arrivalTime, totalSeats, availableSeats, baseFare);
+                    departureTime, arrivalTime, duration, rating, totalSeats, availableSeats,
+                    tatkalTotalSeats, tatkalAvailableSeats, baseFare, tatkalFare);
         } else if ("VANDE_BHARAT".equalsIgnoreCase(trainType)) {
             t = new com.railway.model.VandeBharatTrain(id, trainNumber, trainName, sourceStationId, destinationStationId,
-                    departureTime, arrivalTime, totalSeats, availableSeats, baseFare);
+                    departureTime, arrivalTime, duration, rating, totalSeats, availableSeats,
+                    tatkalTotalSeats, tatkalAvailableSeats, baseFare, tatkalFare);
         } else {
             t = new Train(id, trainNumber, trainName, sourceStationId, destinationStationId,
-                    departureTime, arrivalTime, totalSeats, availableSeats, baseFare, trainType);
+                    departureTime, arrivalTime, duration, rating, totalSeats, availableSeats,
+                    tatkalTotalSeats, tatkalAvailableSeats, baseFare, tatkalFare, trainType);
         }
 
-        t.setSourceStationName(rs.getString("src_name"));
-        t.setDestinationStationName(rs.getString("dest_name"));
+        try {
+            t.setSourceStationName(rs.getString("src_name"));
+            t.setDestinationStationName(rs.getString("dest_name"));
+        } catch (SQLException ignored) {}
         return t;
     }
 }

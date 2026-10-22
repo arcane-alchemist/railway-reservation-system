@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.railway.controller.AdminDashboardController"
+      spacing="16" styleClass="app-root">
+    <padding>
+        <Insets top="16" right="20" bottom="16" left="20"/>
+    </padding>
+
+    <!-- Top Admin Header Bar -->
+    <HBox alignment="CENTER_LEFT" spacing="15" styleClass="card-panel">
+        <padding>
+            <Insets top="12" right="20" bottom="12" left="20"/>
+        </padding>
+
+        <Label text="🚄" style="-fx-font-size: 26px;"/>
+        <VBox HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Indian Railways — Operations &amp; Admin Console" styleClass="section-title"/>
+                <Label text="ADMINISTRATOR" styleClass="badge-admin"/>
+            </HBox>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label fx:id="adminWelcomeLabel" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <Label text="•" style="-fx-text-fill: #94a3b8;"/>
+                <Label fx:id="adminDepartmentLabel" styleClass="header-subtitle"/>
+            </HBox>
+        </VBox>
+
+        <Button text="Sign Out" onAction="#handleLogout" styleClass="btn-secondary"/>
+    </HBox>
+
+    <!-- KPI Metric Summary Row -->
+    <HBox spacing="12">
+        <VBox spacing="4" styleClass="metric-card" HBox.hgrow="ALWAYS">
+            <Label text="Fleet Trains" styleClass="metric-title"/>
+            <Label fx:id="kpiTotalTrainsLabel" text="0" styleClass="metric-value-blue"/>
+        </VBox>
+        <VBox spacing="4" styleClass="metric-card" HBox.hgrow="ALWAYS">
+            <Label text="System Bookings" styleClass="metric-title"/>
+            <Label fx:id="kpiTotalBookingsLabel" text="0" styleClass="metric-value-navy"/>
+        </VBox>
+        <VBox spacing="4" styleClass="metric-card" HBox.hgrow="ALWAYS">
+            <Label text="Confirmed Seats" styleClass="metric-title"/>
+            <Label fx:id="kpiConfirmedBookingsLabel" text="0" styleClass="metric-value-green"/>
+        </VBox>
+        <VBox spacing="4" styleClass="metric-card" HBox.hgrow="ALWAYS">
+            <Label text="Net Revenue Collected" styleClass="metric-title"/>
+            <Label fx:id="kpiTotalRevenueLabel" text="₹ 0.00" styleClass="metric-value-green"/>
+        </VBox>
+        <VBox spacing="4" styleClass="metric-card" HBox.hgrow="ALWAYS">
+            <Label text="Total Refunds Issued" styleClass="metric-title"/>
+            <Label fx:id="kpiTotalRefundsLabel" text="₹ 0.00" styleClass="metric-value-orange"/>
+        </VBox>
+    </HBox>
+
+    <!-- Admin Tabs -->
+    <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <!-- TAB 1: TRAIN FLEET & PRICING -->
+        <Tab text="  🚆 Fleet &amp; Quota Management  ">
+            <VBox spacing="14" styleClass="card-panel">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <VBox HBox.hgrow="ALWAYS">
+                        <Label text="Active Train Network &amp; Seat Quota Inventory" styleClass="section-title"/>
+                        <Label text="Select any train from the inventory table below to modify base fare, Tatkal pricing, and capacity." styleClass="header-subtitle"/>
+                    </VBox>
+                </HBox>
+
+                <TableView fx:id="trainsTable" VBox.vgrow="ALWAYS" prefHeight="260">
+                    <columns>
+                        <TableColumn fx:id="trainNumberCol" text="Train #" prefWidth="80"/>
+                        <TableColumn fx:id="trainNameCol" text="Train Name &amp; Category" prefWidth="220"/>
+                        <TableColumn fx:id="routeCol" text="Route" prefWidth="240"/>
+                        <TableColumn fx:id="scheduleCol" text="Dep - Arr" prefWidth="120"/>
+                        <TableColumn fx:id="totalSeatsCol" text="Total Seats" prefWidth="90"/>
+                        <TableColumn fx:id="availSeatsCol" text="Gen Avail" prefWidth="90"/>
+                        <TableColumn fx:id="tatkalSeatsCol" text="Tatkal Avail" prefWidth="90"/>
+                        <TableColumn fx:id="baseFareCol" text="Base Fare (₹)" prefWidth="105"/>
+                        <TableColumn fx:id="tatkalFareCol" text="Tatkal Fare (₹)" prefWidth="105"/>
+                    </columns>
+                </TableView>
+
+                <!-- Train Pricing & Quota Edit Strip -->
+                <VBox spacing="10" style="-fx-background-color: #f8fafc; -fx-padding: 14; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <Label text="Selected Train:" style="-fx-font-weight: bold;"/>
+                        <Label fx:id="selectedTrainLabel" text="Select a train from above table" style="-fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="editStatusLabel" style="-fx-font-weight: bold;"/>
+                    </HBox>
+
+                    <HBox spacing="10" alignment="BOTTOM_LEFT">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Base Fare (₹):"/>
+                            <TextField fx:id="editBaseFareField" promptText="e.g. 1500.0"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Tatkal Fare (₹):"/>
+                            <TextField fx:id="editTatkalFareField" promptText="e.g. 1950.0"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Total Capacity:"/>
+                            <TextField fx:id="editTotalSeatsField" promptText="e.g. 120"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Tatkal Quota:"/>
+                            <TextField fx:id="editTatkalSeatsField" promptText="e.g. 20"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Departure Time:"/>
+                            <TextField fx:id="editDepTimeField" promptText="HH:mm"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Arrival Time:"/>
+                            <TextField fx:id="editArrTimeField" promptText="HH:mm"/>
+                        </VBox>
+                        <Button fx:id="saveTrainButton" text="💾 Update Train" onAction="#handleSaveTrainUpdates"
+                                disable="true" styleClass="btn-primary" prefHeight="38"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 2: MASTER BOOKINGS & REVENUE LEDGER -->
+        <Tab text="  📜 Master Bookings Ledger  ">
+            <VBox spacing="14" styleClass="card-panel">
+                <padding>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
+                </padding>
+
+                <HBox alignment="CENTER_LEFT" spacing="12">
+                    <VBox HBox.hgrow="ALWAYS">
+                        <Label text="System-Wide Real-Time Passenger Bookings Ledger" styleClass="section-title"/>
+                        <Label text="Complete audit trail of all confirmed, waitlisted, and cancelled passenger tickets across India." styleClass="header-subtitle"/>
+                    </VBox>
+                    <TextField fx:id="ledgerSearchField" promptText="Filter by PNR, Train, Status..." prefWidth="250"/>
+                    <Button text="Filter" onAction="#handleFilterLedger" styleClass="btn-secondary"/>
+                </HBox>
+
+                <TableView fx:id="allBookingsTable" VBox.vgrow="ALWAYS" prefHeight="380">
+                    <columns>
+                        <TableColumn fx:id="ledgerPnrCol" text="PNR Reference" prefWidth="130"/>
+                        <TableColumn fx:id="ledgerUserIdCol" text="User ID" prefWidth="70"/>
+                        <TableColumn fx:id="ledgerTrainCol" text="Train Name &amp; #" prefWidth="240"/>
+                        <TableColumn fx:id="ledgerDateCol" text="Travel Date" prefWidth="105"/>
+                        <TableColumn fx:id="ledgerQuotaCol" text="Quota" prefWidth="95"/>
+                        <TableColumn fx:id="ledgerClassCol" text="Class" prefWidth="85"/>
+                        <TableColumn fx:id="ledgerFareCol" text="Fare (₹)" prefWidth="100"/>
+                        <TableColumn fx:id="ledgerStatusCol" text="Status" prefWidth="105"/>
+                        <TableColumn fx:id="ledgerRefundCol" text="Refund (₹)" prefWidth="100"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 3: GLOBAL PNR AUDIT -->
+        <Tab text="  🔍 Global PNR Dossier Audit  ">
+            <VBox spacing="14" styleClass="card-panel">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+
+                <Label text="Comprehensive Passenger Ticket &amp; Berth Dossier" styleClass="section-title"/>
+                <Label text="Inspect passenger demographic data, berth allocation, and IRCTC cancellation/refund logs." styleClass="header-subtitle"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="600">
+                    <TextField fx:id="auditPnrField" promptText="Enter 8-to-10 digit PNR (e.g. PNR12345678)" HBox.hgrow="ALWAYS"/>
+                    <Button text="Audit Ticket Dossier" onAction="#handleAuditPNR" styleClass="btn-primary"/>
+                </HBox>
+
+                <Label fx:id="auditResultHeaderLabel" style="-fx-font-weight: bold; -fx-font-size: 14px;"/>
+
+                <TextArea fx:id="auditDetailsArea" editable="false" VBox.vgrow="ALWAYS" prefHeight="320"
+                          style="-fx-font-family: 'Consolas', 'Courier New', monospace; -fx-font-size: 13px;"
+                          promptText="Enter a PNR number and click 'Audit Ticket Dossier' to review complete passenger &amp; seat breakdown..."/>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

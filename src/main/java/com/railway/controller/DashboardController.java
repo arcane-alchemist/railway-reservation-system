@@ -1,13 +1,10 @@
 package com.railway.controller;
 
-import com.railway.concurrency.BookingExecutor;
 import com.railway.model.Booking;
 import com.railway.model.User;
 import com.railway.service.AuthService;
 import com.railway.service.BookingService;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Controller for the main user dashboard, booking history, and concurrency benchmark.
+ * Controller for the Passenger Portal: personal booking history, PNR enquiry, and IRCTC ticket cancellation.
  */
 public class DashboardController {
 
@@ -47,11 +44,6 @@ public class DashboardController {
     @FXML private TextField pnrSearchField;
     @FXML private Label pnrSearchResultLabel;
 
-    // Concurrency Demo
-    @FXML private TextArea concurrencyLogArea;
-    @FXML private Button runSimulationButton;
-    @FXML private ProgressIndicator simulationSpinner;
-
     private final BookingService bookingService = new BookingService();
     private final ObservableList<Booking> userBookingsList = FXCollections.observableArrayList();
 
@@ -59,21 +51,16 @@ public class DashboardController {
     public void initialize() {
         User currentUser = AuthService.getCurrentUser();
         if (currentUser != null) {
-            // Polymorphic method call
-            welcomeHeaderLabel.setText(currentUser.getDashboardGreeting());
-            userRoleBadge.setText(currentUser.getRole());
+            welcomeHeaderLabel.setText(currentUser.getFullName());
+            if (userRoleBadge != null) userRoleBadge.setText(currentUser.getRole());
             loadUserBookings(currentUser.getId());
         } else {
-            welcomeHeaderLabel.setText("Welcome to Indian Railways Booking Portal");
-            userRoleBadge.setText("GUEST");
+            welcomeHeaderLabel.setText("Passenger");
+            if (userRoleBadge != null) userRoleBadge.setText("PASSENGER");
             loadUserBookings(2); // default demo passenger
         }
 
         setupBookingsTable();
-
-        if (simulationSpinner != null) {
-            simulationSpinner.setVisible(false);
-        }
     }
 
     private void setupBookingsTable() {
@@ -106,9 +93,9 @@ public class DashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/search.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root, 1000, 700);
+            Scene scene = new Scene(root, 1024, 720);
             scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
-            stage.setTitle("Indian Railways - Search Trains");
+            stage.setTitle("RailPlan — Search Trains");
             stage.setScene(scene);
             stage.show();
         } catch (IOException e) {
@@ -124,13 +111,34 @@ public class DashboardController {
             return;
         }
 
-        boolean cancelled = bookingService.cancelTicket(selected.getId());
-        if (cancelled) {
-            showStatus("Booking " + selected.getBookingReference() + " successfully cancelled. Seats released.", false);
-            User user = AuthService.getCurrentUser();
-            loadUserBookings(user != null ? user.getId() : 2);
-        } else {
-            showStatus("Failed to cancel booking.", true);
+        var quote = bookingService.calculateCancellationQuote(selected);
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("IRCTC Ticket Cancellation & Refund Preview");
+        alert.setHeaderText("PNR: " + selected.getBookingReference() + " (" + selected.getQuota() + " Quota)");
+        alert.setContentText(String.format(
+                "Journey Date: %s | Status: %s\n\n" +
+                "Total Fare Paid:        ₹ %.2f\n" +
+                "IRCTC Cancellation Fee:  ₹ %.2f\n" +
+                "Net Refund Amount:      ₹ %.2f\n\n" +
+                "Policy Applied:\n%s\n\n" +
+                "Do you want to proceed with ticket cancellation?",
+                selected.getTravelDate(), selected.getStatus(),
+                quote.getTotalFare(), quote.getCancellationFee(), quote.getRefundAmount(),
+                quote.getRuleApplied()
+        ));
+
+        var res = alert.showAndWait();
+        if (res.isPresent() && res.get() == ButtonType.OK) {
+            boolean cancelled = bookingService.cancelTicketWithRefund(selected, "Passenger cancelled via portal");
+            if (cancelled) {
+                showStatus(String.format("Booking %s cancelled. Net refund of ₹%.2f initiated. Official receipt saved in /tickets.",
+                        selected.getBookingReference(), quote.getRefundAmount()), false);
+                User user = AuthService.getCurrentUser();
+                loadUserBookings(user != null ? user.getId() : 2);
+            } else {
+                showStatus("Failed to cancel booking.", true);
+            }
         }
     }
 
@@ -138,48 +146,21 @@ public class DashboardController {
     public void handleSearchPNR(ActionEvent event) {
         String pnr = pnrSearchField.getText();
         if (pnr == null || pnr.trim().isEmpty()) {
-            pnrSearchResultLabel.setText("Please enter a valid PNR number.");
-            pnrSearchResultLabel.setStyle("-fx-text-fill: #e63946;");
+            pnrSearchResultLabel.setText("Please enter a valid 8-to-10 digit PNR number.");
+            pnrSearchResultLabel.setStyle("-fx-text-fill: #ef4444;");
             return;
         }
 
         Optional<Booking> bookingOpt = bookingService.getBookingByPNR(pnr.trim().toUpperCase());
         if (bookingOpt.isPresent()) {
             Booking b = bookingOpt.get();
-            pnrSearchResultLabel.setText(String.format("PNR: %s | Train: %s | Date: %s | Status: %s | Total: ₹%.2f",
-                    b.getBookingReference(), b.getTrainName(), b.getTravelDate(), b.getStatus(), b.getTotalFare()));
-            pnrSearchResultLabel.setStyle("-fx-text-fill: #2a9d8f;");
+            pnrSearchResultLabel.setText(String.format("PNR: %s | Train: %s (%s) | Travel Date: %s | Status: %s | Quota: %s | Class: %s | Total Fare: ₹%.2f",
+                    b.getBookingReference(), b.getTrainName(), b.getTrainNumber(), b.getTravelDate(), b.getStatus(), b.getQuota(), b.getTravelClass(), b.getTotalFare()));
+            pnrSearchResultLabel.setStyle("-fx-text-fill: #10b981;");
         } else {
-            pnrSearchResultLabel.setText("PNR not found in system records.");
-            pnrSearchResultLabel.setStyle("-fx-text-fill: #e63946;");
+            pnrSearchResultLabel.setText("PNR '" + pnr.trim().toUpperCase() + "' was not found in IRCTC system records.");
+            pnrSearchResultLabel.setStyle("-fx-text-fill: #ef4444;");
         }
-    }
-
-    @FXML
-    public void handleRunConcurrencySimulation(ActionEvent event) {
-        if (concurrencyLogArea != null) {
-            concurrencyLogArea.clear();
-            concurrencyLogArea.appendText(">>> Launching Multithreaded Concurrency Benchmark...\n");
-            concurrencyLogArea.appendText("Spawning 20 concurrent passenger threads competing simultaneously for seats on Train #12952.\n\n");
-        }
-
-        if (simulationSpinner != null) simulationSpinner.setVisible(true);
-        if (runSimulationButton != null) runSimulationButton.setDisable(true);
-
-        Thread simulationThread = new Thread(() -> {
-            bookingService.runConcurrencySimulation(1, 20);
-            Platform.runLater(() -> {
-                if (simulationSpinner != null) simulationSpinner.setVisible(false);
-                if (runSimulationButton != null) runSimulationButton.setDisable(false);
-                if (concurrencyLogArea != null) {
-                    concurrencyLogArea.appendText("\n>>> Concurrency Benchmark Completed successfully! Check console output for granular thread timestamps.\n");
-                }
-                User user = AuthService.getCurrentUser();
-                loadUserBookings(user != null ? user.getId() : 2);
-            });
-        });
-        simulationThread.setDaemon(true);
-        simulationThread.start();
     }
 
     @FXML
@@ -189,7 +170,7 @@ public class DashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/login.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root, 1000, 700);
+            Scene scene = new Scene(root, 1024, 720);
             scene.getStylesheets().add(getClass().getResource("/css/style.css").toExternalForm());
             stage.setTitle("Indian Railways - Login Portal");
             stage.setScene(scene);
@@ -202,7 +183,7 @@ public class DashboardController {
     private void showStatus(String msg, boolean isError) {
         if (statusMessageLabel != null) {
             statusMessageLabel.setText(msg);
-            statusMessageLabel.setStyle(isError ? "-fx-text-fill: #e63946;" : "-fx-text-fill: #2a9d8f;");
+            statusMessageLabel.setStyle(isError ? "-fx-text-fill: #ef4444;" : "-fx-text-fill: #10b981;");
         }
     }
 }

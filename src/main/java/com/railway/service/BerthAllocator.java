@@ -57,6 +57,10 @@ public class BerthAllocator {
     /**
      * Determines optimal berth type based on demographics if no preference was expressed.
      */
+    public static String allocateOptimalBerth(Reservation reservation) {
+        return getDemographicPreference(reservation);
+    }
+
     public static String getDemographicPreference(Reservation reservation) {
         String pref = reservation.getBerthPreference();
         if (pref != null && !pref.trim().isEmpty() &&

@@ -171,6 +171,16 @@ public class Main extends Application {
         int trainIndex = Integer.parseInt(scanner.nextLine().trim()) - 1;
         Train selectedTrain = trains.get(trainIndex);
 
+        System.out.print("Enter Journey Date (YYYY-MM-DD, Press Enter for Tomorrow): ");
+        String travelDate = scanner.nextLine().trim();
+        if (travelDate.isEmpty()) {
+            travelDate = java.time.LocalDate.now().plusDays(1).toString();
+        }
+
+        System.out.print("Select Booking Quota ([1] GENERAL, [2] TATKAL): ");
+        String quotaChoice = scanner.nextLine().trim();
+        String quota = ("2".equals(quotaChoice) || "TATKAL".equalsIgnoreCase(quotaChoice)) ? "TATKAL" : "GENERAL";
+
         System.out.print("Enter Travel Class (AC_3_TIER / AC_2_TIER / AC_1_TIER / SLEEPER): ");
         String travelClass = scanner.nextLine().trim().toUpperCase();
         if (travelClass.isEmpty()) travelClass = "AC_3_TIER";
@@ -184,18 +194,21 @@ public class Main extends Application {
         System.out.print("Enter Passenger Gender (Male/Female/Other): ");
         String gender = scanner.nextLine().trim();
 
-        System.out.print("Enter Berth Preference (LOWER / UPPER / MIDDLE / SIDE LOWER): ");
+        System.out.print("Enter Berth Preference (LOWER / UPPER / MIDDLE / SIDE LOWER / NO PREFERENCE): ");
         String berth = scanner.nextLine().trim().toUpperCase();
 
         Reservation p = new Reservation(name, age, gender, berth);
         List<Reservation> passengers = List.of(p);
 
-        // Show polymorphic fare calculation
-        double totalFare = bookingService.getFareService().calculateTotalFare(selectedTrain, travelClass, passengers);
-        System.out.printf("Calculated Total Fare (with class multiplier & concessions): ₹%.2f\n", totalFare);
+        // Show polymorphic fare calculation with Tatkal if selected
+        double standardFare = bookingService.getFareService().calculateTotalFare(selectedTrain, travelClass, passengers);
+        double totalFare = "TATKAL".equalsIgnoreCase(quota)
+                ? bookingService.getTatkalService().calculateTatkalFare(selectedTrain, travelClass, standardFare)
+                : standardFare;
+        System.out.printf("Calculated Total Fare (Quota: %s, with class multiplier & concessions): ₹%.2f\n", quota, totalFare);
 
         System.out.println("Submitting booking through multithreaded queue...");
-        var future = bookingService.bookTicketAsync(user.getId(), selectedTrain.getId(), "2026-11-20", travelClass, passengers);
+        var future = bookingService.bookTicketAsync(user.getId(), selectedTrain.getId(), travelDate, travelClass, quota, passengers);
         try {
             var result = future.get();
             System.out.println("RESULT: " + result.message());
@@ -244,11 +257,34 @@ public class Main extends Application {
         String pnr = scanner.nextLine().trim().toUpperCase();
         Optional<Booking> booking = bookingService.getBookingByPNR(pnr);
         if (booking.isPresent()) {
-            boolean success = bookingService.cancelTicket(booking.get().getId());
-            if (success) {
-                System.out.println("Booking " + pnr + " successfully cancelled. Seats have been restored to inventory.");
+            Booking b = booking.get();
+            if ("CANCELLED".equalsIgnoreCase(b.getStatus())) {
+                System.out.println("This booking is already cancelled.");
+                return;
+            }
+
+            var quote = bookingService.calculateCancellationQuote(b);
+            System.out.println("\n--- IRCTC CANCELLATION & REFUND QUOTE ---");
+            System.out.printf(" PNR:                 %s (%s Quota)\n", b.getBookingReference(), b.getQuota());
+            System.out.printf(" Total Fare Paid:     ₹ %.2f\n", quote.getTotalFare());
+            System.out.printf(" Cancellation Charge: ₹ %.2f\n", quote.getCancellationFee());
+            System.out.printf(" Net Refund to Bank:  ₹ %.2f\n", quote.getRefundAmount());
+            System.out.printf(" Applicable Policy:   %s\n", quote.getRuleApplied());
+            System.out.println("------------------------------------------");
+
+            System.out.print("Proceed with cancellation? (yes/no): ");
+            String ans = scanner.nextLine().trim().toLowerCase();
+            if ("yes".equals(ans) || "y".equals(ans)) {
+                boolean success = bookingService.cancelTicketWithRefund(b, "Cancelled via CLI interface");
+                if (success) {
+                    System.out.println("Booking " + pnr + " successfully cancelled! Refund of ₹" +
+                            String.format("%.2f", quote.getRefundAmount()) + " initiated.");
+                    System.out.println("Cancellation receipt generated in tickets/ directory.");
+                } else {
+                    System.out.println("Failed to cancel booking.");
+                }
             } else {
-                System.out.println("Failed to cancel booking (already cancelled or invalid).");
+                System.out.println("Cancellation aborted.");
             }
         } else {
             System.out.println("No booking found with PNR: " + pnr);

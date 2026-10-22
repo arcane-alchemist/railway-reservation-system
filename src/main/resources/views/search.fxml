@@ -6,9 +6,9 @@
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.railway.controller.SearchController"
-      spacing="16" style="-fx-background-color: #0b1120;">
+      spacing="16" styleClass="app-root">
     <padding>
-        <Insets top="20" right="25" bottom="20" left="25"/>
+        <Insets top="16" right="20" bottom="16" left="20"/>
     </padding>
 
     <!-- Top Navigation Bar -->
@@ -18,61 +18,79 @@
         </padding>
         <Button text="← Back to Dashboard" onAction="#handleBackToDashboard" styleClass="btn-secondary"/>
         <VBox HBox.hgrow="ALWAYS">
-            <Label text="Search &amp; Book Trains" styleClass="section-title"/>
-            <Label text="Find available trains across major Indian Railways routes" styleClass="header-subtitle"/>
+            <Label text="RailPlan — Search &amp; Book Trains" styleClass="section-title"/>
+            <Label text="Direct booking with real-time seat inventory, Tatkal quota, and instant PNR" styleClass="header-subtitle"/>
         </VBox>
     </HBox>
 
-    <!-- Search Controls Card -->
-    <VBox spacing="14" styleClass="card-panel">
+    <!-- Search Controls Card (Inspired by RailPlan & Speed Rail top bar) -->
+    <VBox spacing="12" styleClass="card-panel">
         <padding>
             <Insets top="16" right="20" bottom="16" left="20"/>
         </padding>
 
-        <HBox spacing="15" alignment="BOTTOM_LEFT">
-            <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Source Station:"/>
-                <ComboBox fx:id="sourceStationCombo" maxWidth="Infinity" promptText="Select origin"/>
+        <HBox spacing="10" alignment="BOTTOM_LEFT">
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="From Station:"/>
+                <ComboBox fx:id="sourceStationCombo" maxWidth="Infinity" promptText="Select boarding station"/>
             </VBox>
 
-            <VBox spacing="6" HBox.hgrow="ALWAYS">
-                <Label text="Destination Station:"/>
+            <Button text="⇄" onAction="#handleSwapStations" styleClass="btn-secondary"
+                    prefHeight="38" prefWidth="42" style="-fx-font-size: 16px; -fx-padding: 0;"/>
+
+            <VBox spacing="5" HBox.hgrow="ALWAYS">
+                <Label text="To Station:"/>
                 <ComboBox fx:id="destinationStationCombo" maxWidth="Infinity" promptText="Select destination"/>
             </VBox>
 
-            <VBox spacing="6" prefWidth="180">
-                <Label text="Journey Date:"/>
+            <VBox spacing="5" prefWidth="150">
+                <Label text="Departure Date:"/>
                 <DatePicker fx:id="travelDatePicker" maxWidth="Infinity"/>
             </VBox>
 
-            <Button text="🔍 Search Trains" onAction="#handleSearchTrains" styleClass="btn-primary" prefHeight="38"/>
+            <VBox spacing="5" prefWidth="140">
+                <Label text="Booking Quota:"/>
+                <ComboBox fx:id="quotaCombo" maxWidth="Infinity"/>
+            </VBox>
+
+            <VBox spacing="5" prefWidth="130">
+                <Label text="Travel Class:"/>
+                <ComboBox fx:id="classFilterCombo" maxWidth="Infinity"/>
+            </VBox>
+
+            <Button text="🔍 Search Tickets" onAction="#handleSearchTrains" styleClass="btn-primary" prefHeight="38"/>
         </HBox>
 
-        <Label fx:id="searchStatusLabel" style="-fx-font-weight: bold;"/>
+        <Label fx:id="searchStatusLabel" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
     </VBox>
 
-    <!-- Train Results Table Card -->
+    <!-- Train Results Card -->
     <VBox spacing="12" styleClass="card-panel" VBox.vgrow="ALWAYS">
         <padding>
             <Insets top="15" right="15" bottom="15" left="15"/>
         </padding>
 
-        <HBox alignment="CENTER_LEFT">
-            <Label text="Available Train Services" styleClass="section-title" HBox.hgrow="ALWAYS"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="bookTrainButton" text="Proceed to Book Selected Train →" onAction="#handleProceedToBooking"
-                    disable="true" styleClass="btn-success"/>
+        <HBox alignment="CENTER_LEFT" spacing="12">
+            <VBox HBox.hgrow="ALWAYS">
+                <Label text="Available Trains on Selected Route" styleClass="section-title"/>
+                <Label text="Live IRCTC berth availability with instant confirmed booking &amp; random seat fallback." styleClass="header-subtitle"/>
+            </VBox>
+            <Button fx:id="bookTrainButton" text="Select Train &amp; Continue →" onAction="#handleProceedToBooking"
+                    disable="true" styleClass="btn-success" prefHeight="38"/>
         </HBox>
 
-        <TableView fx:id="trainTable" VBox.vgrow="ALWAYS">
+        <TableView fx:id="trainTable" VBox.vgrow="ALWAYS" prefHeight="380">
             <columns>
-                <TableColumn fx:id="trainNumberCol" text="Train #" prefWidth="90"/>
-                <TableColumn fx:id="trainNameCol" text="Train Name" prefWidth="240"/>
-                <TableColumn fx:id="typeCol" text="Type" prefWidth="130"/>
-                <TableColumn fx:id="departureCol" text="Departure" prefWidth="100"/>
-                <TableColumn fx:id="arrivalCol" text="Arrival" prefWidth="100"/>
-                <TableColumn fx:id="seatsCol" text="Available Seats" prefWidth="130"/>
-                <TableColumn fx:id="fareCol" text="Base Fare (₹)" prefWidth="120"/>
+                <TableColumn fx:id="trainNumberCol" text="Train #" prefWidth="85"/>
+                <TableColumn fx:id="trainNameCol" text="Train Name" prefWidth="200"/>
+                <TableColumn fx:id="typeCol" text="Category" prefWidth="120"/>
+                <TableColumn fx:id="ratingCol" text="Rating" prefWidth="75"/>
+                <TableColumn fx:id="durationCol" text="Duration" prefWidth="95"/>
+                <TableColumn fx:id="departureCol" text="Departure" prefWidth="90"/>
+                <TableColumn fx:id="arrivalCol" text="Arrival" prefWidth="90"/>
+                <TableColumn fx:id="seatsCol" text="General Seats" prefWidth="105"/>
+                <TableColumn fx:id="tatkalSeatsCol" text="Tatkal Seats" prefWidth="105"/>
+                <TableColumn fx:id="fareCol" text="Fare (₹)" prefWidth="110"/>
             </columns>
         </TableView>
     </VBox>

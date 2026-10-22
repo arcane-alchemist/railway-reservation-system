@@ -6,51 +6,60 @@
 
 <VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.railway.controller.DashboardController"
-      spacing="18" style="-fx-background-color: #0b1120;">
+      spacing="16" styleClass="app-root">
     <padding>
-        <Insets top="20" right="25" bottom="20" left="25"/>
+        <Insets top="16" right="20" bottom="16" left="20"/>
     </padding>
 
-    <!-- Top Navigation Bar -->
+    <!-- Top Passenger Navigation Bar -->
     <HBox alignment="CENTER_LEFT" spacing="15" styleClass="card-panel">
         <padding>
-            <Insets top="14" right="20" bottom="14" left="20"/>
+            <Insets top="12" right="20" bottom="12" left="20"/>
         </padding>
+
+        <Label text="🚆" style="-fx-font-size: 26px;"/>
         <VBox HBox.hgrow="ALWAYS">
             <HBox spacing="10" alignment="CENTER_LEFT">
-                <Label fx:id="welcomeHeaderLabel" style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;"/>
-                <Label fx:id="userRoleBadge" style="-fx-background-color: #0369a1; -fx-text-fill: white; -fx-padding: 3 8; -fx-background-radius: 6; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                <Label text="RailPlan — IRCTC Passenger Portal" styleClass="section-title"/>
+                <Label text="PASSENGER" styleClass="badge-passenger"/>
             </HBox>
-            <Label text="Indian Railways Official IRCTC Reservation &amp; Concurrency System" styleClass="header-subtitle"/>
+            <HBox spacing="8" alignment="CENTER_LEFT">
+                <Label fx:id="welcomeHeaderLabel" style="-fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                <Label text="•" style="-fx-text-fill: #94a3b8;"/>
+                <Label text="Real-Time Seat Booking, Dynamic Fares &amp; PNR Status" styleClass="header-subtitle"/>
+            </HBox>
         </VBox>
 
-        <Button text="🔍 Book New Ticket" onAction="#handleNavigateToSearch" styleClass="btn-primary"/>
-        <Button text="Logout" onAction="#handleLogout" styleClass="btn-secondary"/>
+        <Button text="🔍 Search &amp; Book Trains" onAction="#handleNavigateToSearch" styleClass="btn-primary"/>
+        <Button text="Sign Out" onAction="#handleLogout" styleClass="btn-secondary"/>
     </HBox>
 
-    <Label fx:id="statusMessageLabel" style="-fx-font-weight: bold;"/>
+    <Label fx:id="statusMessageLabel" style="-fx-font-weight: bold; -fx-font-size: 13px;"/>
 
-    <!-- Dashboard Tabs -->
+    <!-- Passenger Tabs -->
     <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
         <!-- TAB 1: MY BOOKINGS -->
-        <Tab text="  📜 My Bookings History  ">
+        <Tab text="  📜 My Bookings &amp; Tickets  ">
             <VBox spacing="14" styleClass="card-panel">
                 <padding>
-                    <Insets top="15" right="15" bottom="15" left="15"/>
+                    <Insets top="16" right="16" bottom="16" left="16"/>
                 </padding>
+
                 <HBox alignment="CENTER_LEFT" spacing="10">
-                    <Label text="Your Active &amp; Past Reservations" styleClass="section-title" HBox.hgrow="ALWAYS"/>
-                    <Region HBox.hgrow="ALWAYS"/>
+                    <VBox HBox.hgrow="ALWAYS">
+                        <Label text="Your Active &amp; Past Train Reservations" styleClass="section-title"/>
+                        <Label text="Select a booking to review travel class, berth allocation, or cancel tickets with IRCTC refund calculation." styleClass="header-subtitle"/>
+                    </VBox>
                     <Button fx:id="cancelBookingButton" text="❌ Cancel Selected Ticket" onAction="#handleCancelSelectedBooking"
                             disable="true" styleClass="btn-danger"/>
                 </HBox>
 
-                <TableView fx:id="bookingsTable" VBox.vgrow="ALWAYS" prefHeight="380">
+                <TableView fx:id="bookingsTable" VBox.vgrow="ALWAYS" prefHeight="400">
                     <columns>
                         <TableColumn fx:id="pnrCol" text="PNR Reference" prefWidth="140"/>
-                        <TableColumn fx:id="trainCol" text="Train Name &amp; #" prefWidth="250"/>
+                        <TableColumn fx:id="trainCol" text="Train Name &amp; #" prefWidth="260"/>
                         <TableColumn fx:id="travelDateCol" text="Travel Date" prefWidth="120"/>
-                        <TableColumn fx:id="classCol" text="Class" prefWidth="120"/>
+                        <TableColumn fx:id="classCol" text="Class" prefWidth="110"/>
                         <TableColumn fx:id="fareCol" text="Total Fare (₹)" prefWidth="120"/>
                         <TableColumn fx:id="statusCol" text="Status" prefWidth="120"/>
                     </columns>
@@ -59,40 +68,25 @@
         </Tab>
 
         <!-- TAB 2: PNR STATUS ENQUIRY -->
-        <Tab text="  🔎 PNR Enquiry  ">
-            <VBox spacing="20" styleClass="card-panel">
+        <Tab text="  🔎 PNR Status Enquiry  ">
+            <VBox spacing="18" styleClass="card-panel">
                 <padding>
-                    <Insets top="25" right="25" bottom="25" left="25"/>
+                    <Insets top="24" right="24" bottom="24" left="24"/>
                 </padding>
+
                 <Label text="Instant PNR Status Verification" styleClass="section-title"/>
-                <Label text="Enter any 8-to-10 digit PNR number to retrieve journey details, seat allocations, and confirmation status." styleClass="header-subtitle"/>
+                <Label text="Enter your 8-to-10 digit PNR to retrieve live confirmation status, journey route, and allocated seat." styleClass="header-subtitle"/>
 
-                <HBox spacing="12" alignment="CENTER_LEFT" maxWidth="600">
+                <HBox spacing="10" alignment="CENTER_LEFT" maxWidth="600">
                     <TextField fx:id="pnrSearchField" promptText="Enter PNR Number (e.g. PNR12345678)" HBox.hgrow="ALWAYS"/>
-                    <Button text="Check PNR" onAction="#handleSearchPNR" styleClass="btn-primary"/>
+                    <Button text="Check PNR Status" onAction="#handleSearchPNR" styleClass="btn-primary"/>
                 </HBox>
 
-                <Label fx:id="pnrSearchResultLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;" wrapText="true"/>
-            </VBox>
-        </Tab>
-
-        <!-- TAB 3: CONCURRENCY & MULTITHREADING BENCHMARK -->
-        <Tab text="  ⚡ Multithreading Simulator  ">
-            <VBox spacing="14" styleClass="card-panel">
-                <padding>
-                    <Insets top="20" right="20" bottom="20" left="20"/>
-                </padding>
-                <HBox alignment="CENTER_LEFT" spacing="15">
-                    <VBox HBox.hgrow="ALWAYS">
-                        <Label text="High-Concurrency Seat Reservation Simulation (Tatkal Storm)" styleClass="section-title"/>
-                        <Label text="Spawns 20 threads simultaneously competing for seats on the same train to verify thread safety and race-condition prevention." styleClass="header-subtitle"/>
-                    </VBox>
-                    <ProgressIndicator fx:id="simulationSpinner" prefWidth="24" prefHeight="24"/>
-                    <Button fx:id="runSimulationButton" text="▶ Start 20-Thread Simulation" onAction="#handleRunConcurrencySimulation" styleClass="btn-primary"/>
-                </HBox>
-
-                <TextArea fx:id="concurrencyLogArea" editable="false" VBox.vgrow="ALWAYS" prefHeight="350"
-                          promptText="Click 'Start 20-Thread Simulation' to inspect concurrent booking logs in real time..."/>
+                <VBox spacing="8" style="-fx-background-color: #f8fafc; -fx-padding: 16; -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;">
+                    <Label text="Enquiry Result:" style="-fx-font-weight: bold; -fx-text-fill: #475569;"/>
+                    <Label fx:id="pnrSearchResultLabel" text="Enter a PNR number above to look up ticket status."
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #64748b;" wrapText="true"/>
+                </VBox>
             </VBox>
         </Tab>
     </TabPane>
