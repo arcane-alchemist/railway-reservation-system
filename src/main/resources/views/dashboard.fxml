@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.railway.controller.DashboardController"
+      spacing="18" style="-fx-background-color: #0b1120;">
+    <padding>
+        <Insets top="20" right="25" bottom="20" left="25"/>
+    </padding>
+
+    <!-- Top Navigation Bar -->
+    <HBox alignment="CENTER_LEFT" spacing="15" styleClass="card-panel">
+        <padding>
+            <Insets top="14" right="20" bottom="14" left="20"/>
+        </padding>
+        <VBox HBox.hgrow="ALWAYS">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="welcomeHeaderLabel" style="-fx-font-size: 19px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;"/>
+                <Label fx:id="userRoleBadge" style="-fx-background-color: #0369a1; -fx-text-fill: white; -fx-padding: 3 8; -fx-background-radius: 6; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+            </HBox>
+            <Label text="Indian Railways Official IRCTC Reservation &amp; Concurrency System" styleClass="header-subtitle"/>
+        </VBox>
+
+        <Button text="🔍 Book New Ticket" onAction="#handleNavigateToSearch" styleClass="btn-primary"/>
+        <Button text="Logout" onAction="#handleLogout" styleClass="btn-secondary"/>
+    </HBox>
+
+    <Label fx:id="statusMessageLabel" style="-fx-font-weight: bold;"/>
+
+    <!-- Dashboard Tabs -->
+    <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+        <!-- TAB 1: MY BOOKINGS -->
+        <Tab text="  📜 My Bookings History  ">
+            <VBox spacing="14" styleClass="card-panel">
+                <padding>
+                    <Insets top="15" right="15" bottom="15" left="15"/>
+                </padding>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Your Active &amp; Past Reservations" styleClass="section-title" HBox.hgrow="ALWAYS"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="cancelBookingButton" text="❌ Cancel Selected Ticket" onAction="#handleCancelSelectedBooking"
+                            disable="true" styleClass="btn-danger"/>
+                </HBox>
+
+                <TableView fx:id="bookingsTable" VBox.vgrow="ALWAYS" prefHeight="380">
+                    <columns>
+                        <TableColumn fx:id="pnrCol" text="PNR Reference" prefWidth="140"/>
+                        <TableColumn fx:id="trainCol" text="Train Name &amp; #" prefWidth="250"/>
+                        <TableColumn fx:id="travelDateCol" text="Travel Date" prefWidth="120"/>
+                        <TableColumn fx:id="classCol" text="Class" prefWidth="120"/>
+                        <TableColumn fx:id="fareCol" text="Total Fare (₹)" prefWidth="120"/>
+                        <TableColumn fx:id="statusCol" text="Status" prefWidth="120"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 2: PNR STATUS ENQUIRY -->
+        <Tab text="  🔎 PNR Enquiry  ">
+            <VBox spacing="20" styleClass="card-panel">
+                <padding>
+                    <Insets top="25" right="25" bottom="25" left="25"/>
+                </padding>
+                <Label text="Instant PNR Status Verification" styleClass="section-title"/>
+                <Label text="Enter any 8-to-10 digit PNR number to retrieve journey details, seat allocations, and confirmation status." styleClass="header-subtitle"/>
+
+                <HBox spacing="12" alignment="CENTER_LEFT" maxWidth="600">
+                    <TextField fx:id="pnrSearchField" promptText="Enter PNR Number (e.g. PNR12345678)" HBox.hgrow="ALWAYS"/>
+                    <Button text="Check PNR" onAction="#handleSearchPNR" styleClass="btn-primary"/>
+                </HBox>
+
+                <Label fx:id="pnrSearchResultLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;" wrapText="true"/>
+            </VBox>
+        </Tab>
+
+        <!-- TAB 3: CONCURRENCY & MULTITHREADING BENCHMARK -->
+        <Tab text="  ⚡ Multithreading Simulator  ">
+            <VBox spacing="14" styleClass="card-panel">
+                <padding>
+                    <Insets top="20" right="20" bottom="20" left="20"/>
+                </padding>
+                <HBox alignment="CENTER_LEFT" spacing="15">
+                    <VBox HBox.hgrow="ALWAYS">
+                        <Label text="High-Concurrency Seat Reservation Simulation (Tatkal Storm)" styleClass="section-title"/>
+                        <Label text="Spawns 20 threads simultaneously competing for seats on the same train to verify thread safety and race-condition prevention." styleClass="header-subtitle"/>
+                    </VBox>
+                    <ProgressIndicator fx:id="simulationSpinner" prefWidth="24" prefHeight="24"/>
+                    <Button fx:id="runSimulationButton" text="▶ Start 20-Thread Simulation" onAction="#handleRunConcurrencySimulation" styleClass="btn-primary"/>
+                </HBox>
+
+                <TextArea fx:id="concurrencyLogArea" editable="false" VBox.vgrow="ALWAYS" prefHeight="350"
+                          promptText="Click 'Start 20-Thread Simulation' to inspect concurrent booking logs in real time..."/>
+            </VBox>
+        </Tab>
+    </TabPane>
+</VBox>

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fitToWidth="true" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.railway.controller.BookingController"
+            style="-fx-background-color: #0b1120;">
+    <VBox spacing="18" style="-fx-background-color: #0b1120;">
+        <padding>
+            <Insets top="20" right="25" bottom="25" left="25"/>
+        </padding>
+
+        <!-- Top Navigation -->
+        <HBox alignment="CENTER_LEFT" spacing="15" styleClass="card-panel">
+            <padding>
+                <Insets top="12" right="20" bottom="12" left="20"/>
+            </padding>
+            <Button text="← Back to Search" onAction="#handleBackToSearch" styleClass="btn-secondary"/>
+            <VBox HBox.hgrow="ALWAYS">
+                <Label text="Passenger Reservation &amp; Ticket Booking" styleClass="section-title"/>
+                <Label text="Enter passenger details and confirm your seats" styleClass="header-subtitle"/>
+            </VBox>
+        </HBox>
+
+        <!-- Selected Train Details Banner -->
+        <VBox spacing="6" styleClass="card-panel">
+            <padding>
+                <Insets top="16" right="20" bottom="16" left="20"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT" spacing="20">
+                <VBox HBox.hgrow="ALWAYS">
+                    <Label fx:id="trainInfoLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #38bdf8;"/>
+                    <Label fx:id="routeLabel" styleClass="header-subtitle"/>
+                    <Label fx:id="travelDateLabel" style="-fx-text-fill: #f59e0b; -fx-font-weight: bold; -fx-padding: 4 0 0 0;"/>
+                </VBox>
+                <VBox spacing="4" prefWidth="200">
+                    <Label text="Select Travel Class:"/>
+                    <ComboBox fx:id="classChoiceBox" maxWidth="Infinity"/>
+                </VBox>
+            </HBox>
+        </VBox>
+
+        <!-- Split Booking Details (Left: Add Passenger Form, Right: Passenger List & Total Fare) -->
+        <HBox spacing="20">
+            <!-- Left: Add Passenger Form Card -->
+            <VBox spacing="14" styleClass="card-panel" HBox.hgrow="ALWAYS" prefWidth="480">
+                <padding>
+                    <Insets top="18" right="20" bottom="18" left="20"/>
+                </padding>
+                <Label text="Add Passenger" styleClass="section-title"/>
+                <Label text="Enter passenger name, age (senior concessions automatically calculated)." styleClass="header-subtitle"/>
+
+                <VBox spacing="6">
+                    <Label text="Passenger Full Name:"/>
+                    <TextField fx:id="passengerNameField" promptText="e.g. Ramesh Kumar"/>
+                </VBox>
+
+                <HBox spacing="12">
+                    <VBox spacing="6" prefWidth="120">
+                        <Label text="Age:"/>
+                        <TextField fx:id="passengerAgeField" promptText="e.g. 62"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Gender:"/>
+                        <ComboBox fx:id="passengerGenderCombo" maxWidth="Infinity"/>
+                    </VBox>
+                    <VBox spacing="6" HBox.hgrow="ALWAYS">
+                        <Label text="Berth Preference:"/>
+                        <ComboBox fx:id="berthPrefCombo" maxWidth="Infinity"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <Button text="+ Add Passenger to List" onAction="#handleAddPassenger" styleClass="btn-primary"/>
+                    <Button text="Clear List" onAction="#handleClearPassengers" styleClass="btn-secondary"/>
+                </HBox>
+
+                <Label fx:id="bookingStatusLabel" wrapText="true" style="-fx-font-weight: bold;"/>
+            </VBox>
+
+            <!-- Right: Review Passengers & Price Summary Card -->
+            <VBox spacing="14" styleClass="card-panel" HBox.hgrow="ALWAYS" prefWidth="440">
+                <padding>
+                    <Insets top="18" right="20" bottom="18" left="20"/>
+                </padding>
+                <Label text="Passengers &amp; Fare Summary" styleClass="section-title"/>
+
+                <ListView fx:id="passengerListView" prefHeight="160"/>
+
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <VBox HBox.hgrow="ALWAYS">
+                        <Label text="Total Payable Amount (incl. taxes):" styleClass="header-subtitle"/>
+                        <Label fx:id="totalFareLabel" text="₹ 0.00" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #10b981;"/>
+                    </VBox>
+                    <ProgressIndicator fx:id="progressIndicator" prefWidth="28" prefHeight="28"/>
+                    <Button fx:id="confirmBookingButton" text="Confirm &amp; Book Ticket" onAction="#handleConfirmBooking"
+                            styleClass="btn-success" prefHeight="44"/>
+                </HBox>
+            </VBox>
+        </HBox>
+
+        <!-- Confirmed Ticket Display (Initially Hidden) -->
+        <VBox fx:id="ticketConfirmationCard" spacing="12" styleClass="ticket-card">
+            <padding>
+                <Insets top="20" right="25" bottom="20" left="25"/>
+            </padding>
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label text="🎉 TICKET CONFIRMED SUCCESSFULLY!" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #34d399;"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="pnrNumberLabel" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #38bdf8; -fx-background-color: #0c4a6e; -fx-padding: 4 12; -fx-background-radius: 8;"/>
+            </HBox>
+
+            <Separator style="-fx-opacity: 0.3;"/>
+            <Label fx:id="ticketDetailsLabel" style="-fx-font-size: 14px; -fx-line-spacing: 4px; -fx-text-fill: #f1f5f9;"/>
+            
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <Label fx:id="downloadStatusLabel" style="-fx-text-fill: #34d399; -fx-font-weight: bold;"/>
+                <Button text="💾 Download Official E-Ticket (.txt)" onAction="#handleDownloadETicket" styleClass="btn-primary"/>
+            </HBox>
+        </VBox>
+    </VBox>
+</ScrollPane>

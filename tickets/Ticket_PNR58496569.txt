@@ -1,0 +1,20 @@
+==================================================================================
+                      🚆  INDIAN RAILWAYS - ELECTRONIC RESERVATION SLIP (ERS)     
+==================================================================================
+ PNR NUMBER: PNR58496569               BOOKING DATE: Instant
+ STATUS:     CONFIRMED                 TRAVEL CLASS:  SLEEPER
+----------------------------------------------------------------------------------
+ TRAIN:      Karnataka Express (12628)
+ ROUTE:      New Delhi Central  ➔  KSR Bengaluru City
+ DEPARTURE DATE: 2026-11-20
+==================================================================================
+ #    PASSENGER NAME            AGE    GENDER   BERTH / SEAT    STATUS      
+----------------------------------------------------------------------------------
+ 1    aakriti                   19     female   Seat #601 (UPPER) CONFIRMED   
+==================================================================================
+ TOTAL FARE PAID (INCL. GST):  ₹ 1350.00
+ DIGITAL VERIFICATION CODE:    474499010-SECURE
+==================================================================================
+  * Please carry valid Government ID during travel.
+  * Have a pleasant and safe journey with Indian Railways.
+==================================================================================

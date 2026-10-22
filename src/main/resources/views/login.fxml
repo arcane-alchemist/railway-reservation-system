@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.railway.controller.LoginController"
+      alignment="CENTER" spacing="20" style="-fx-background-color: #0b1120;">
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+
+    <!-- Header Section -->
+    <VBox alignment="CENTER" spacing="8">
+        <Label text="🚆 INDIAN RAILWAYS RESERVATION PORTAL" styleClass="header-title"/>
+        <Label text="Enterprise Ticket Booking, Dynamic Fares &amp; Concurrency Engine" styleClass="header-subtitle"/>
+    </VBox>
+
+    <!-- Main Auth Card Container -->
+    <VBox maxWidth="520" styleClass="card-panel" spacing="20">
+        <padding>
+            <Insets top="30" right="35" bottom="30" left="35"/>
+        </padding>
+
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <!-- TAB 1: LOGIN -->
+            <Tab text="  Sign In  ">
+                <VBox spacing="15">
+                    <padding>
+                        <Insets top="20" right="10" bottom="10" left="10"/>
+                    </padding>
+                    <VBox spacing="6">
+                        <Label text="Username:"/>
+                        <TextField fx:id="usernameField" promptText="e.g. passenger1 or admin" text="passenger1"/>
+                    </VBox>
+                    <VBox spacing="6">
+                        <Label text="Password:"/>
+                        <PasswordField fx:id="passwordField" promptText="Enter your password" text="pass123"/>
+                    </VBox>
+                    <Label fx:id="statusLabel" wrapText="true"/>
+                    <Button fx:id="loginButton" text="Authenticate &amp; Launch Dashboard" onAction="#handleLogin"
+                            maxWidth="Infinity" styleClass="btn-primary"/>
+                    
+                    <HBox alignment="CENTER" spacing="5">
+                        <Label text="Default logins: " style="-fx-text-fill: #64748b; -fx-font-size: 11px;"/>
+                        <Label text="passenger1 / pass123  •  admin / admin123" style="-fx-text-fill: #38bdf8; -fx-font-size: 11px; -fx-font-weight: bold;"/>
+                    </HBox>
+                </VBox>
+            </Tab>
+
+            <!-- TAB 2: REGISTER -->
+            <Tab text="  Create Account  ">
+                <VBox spacing="12">
+                    <padding>
+                        <Insets top="15" right="10" bottom="10" left="10"/>
+                    </padding>
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Full Name:"/>
+                            <TextField fx:id="regFullNameField" promptText="e.g. Amit Verma"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Username:"/>
+                            <TextField fx:id="regUsernameField" promptText="Choose username"/>
+                        </VBox>
+                    </HBox>
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Email Address:"/>
+                            <TextField fx:id="regEmailField" promptText="amit@example.com"/>
+                        </VBox>
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Password:"/>
+                            <PasswordField fx:id="regPasswordField" promptText="Password"/>
+                        </VBox>
+                    </HBox>
+                    <HBox spacing="10">
+                        <VBox spacing="4" HBox.hgrow="ALWAYS">
+                            <Label text="Phone Number:"/>
+                            <TextField fx:id="regPhoneField" promptText="10-digit mobile"/>
+                        </VBox>
+                        <VBox spacing="4" prefWidth="100">
+                            <Label text="Age:"/>
+                            <TextField fx:id="regAgeField" promptText="e.g. 29"/>
+                        </VBox>
+                        <VBox spacing="4" prefWidth="120">
+                            <Label text="Gender:"/>
+                            <ComboBox fx:id="regGenderCombo" maxWidth="Infinity"/>
+                        </VBox>
+                    </HBox>
+                    <Label fx:id="regStatusLabel" wrapText="true"/>
+                    <Button text="Register &amp; Book Tickets" onAction="#handleRegister"
+                            maxWidth="Infinity" styleClass="btn-success"/>
+                </VBox>
+            </Tab>
+        </TabPane>
+    </VBox>
+</VBox>
